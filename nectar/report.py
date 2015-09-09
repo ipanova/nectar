@@ -1,16 +1,3 @@
-# -*- coding: utf-8 -*-
-#
-# Copyright © 2013 Red Hat, Inc.
-#
-# This software is licensed to you under the GNU General Public License as
-# published by the Free Software Foundation; either version 2 of the License
-# (GPLv2) or (at your option) any later version.
-# There is NO WARRANTY for this software, express or implied, including the
-# implied warranties of MERCHANTABILITY, NON-INFRINGEMENT, or FITNESS FOR A
-# PARTICULAR PURPOSE.
-# You should have received a copy of GPLv2 along with this software; if not,
-# see http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
-
 from datetime import datetime
 from gettext import gettext as _
 
@@ -40,6 +27,7 @@ class DownloadReport(object):
                             available, such as from an http-related downloader.
     """
     DOWNLOAD_WAITING = 'waiting'
+    DOWNLOAD_HEADERS  = 'headers ready'
     DOWNLOAD_DOWNLOADING = 'downloading'
     DOWNLOAD_SUCCEEDED = 'succeeded'
     DOWNLOAD_FAILED = 'failed'
@@ -85,6 +73,12 @@ class DownloadReport(object):
 
     # state management methods -------------------------------------------------
 
+    def download_headers(self):
+        if self.state != self.DOWNLOAD_WAITING:
+            return
+        self.state = self.DOWNLOAD_HEADERS
+        self.start_time = datetime.now(tz=UTC)
+
     def download_started(self):
         """
         Mark the report as having started.
@@ -93,10 +87,9 @@ class DownloadReport(object):
         report's state the first time it is called. Subsequent calls amount to
         no-ops.
         """
-        if self.state != self.DOWNLOAD_WAITING:
+        if self.state != self.DOWNLOAD_HEADERS:
             return
         self.state = self.DOWNLOAD_DOWNLOADING
-        self.start_time = datetime.now(tz=UTC)
 
     def download_succeeded(self):
         """
@@ -157,6 +150,7 @@ class DownloadReport(object):
 # here for backward-compatibility. It is preferable to access these directly on
 # the DownloadReport object.
 DOWNLOAD_WAITING = DownloadReport.DOWNLOAD_WAITING
+DOWNLOAD_HEADERS = DownloadReport.DOWNLOAD_HEADERS
 DOWNLOAD_DOWNLOADING = DownloadReport.DOWNLOAD_DOWNLOADING
 DOWNLOAD_SUCCEEDED = DownloadReport.DOWNLOAD_SUCCEEDED
 DOWNLOAD_FAILED = DownloadReport.DOWNLOAD_FAILED
